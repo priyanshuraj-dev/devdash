@@ -1,0 +1,138 @@
+import { useNavigate, Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import toast from "react-hot-toast";
+import { FiUser, FiMail, FiLock, FiArrowRight, FiActivity } from "react-icons/fi";
+
+import api from "../services/api";
+import { signupSchema } from "../utils/validators";
+
+type SignupForm = z.infer<typeof signupSchema>;
+export default function Signup() {
+  const navigate = useNavigate();
+
+  const form = useForm<SignupForm>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = form;
+
+  const onSubmit = async (data: SignupForm) => {
+    try {
+      await api.post("/api/auth/signup", data);
+      toast.success("Registration successful! Please verify your email.");
+      navigate("/login");
+    } catch (err: any) {
+      toast.error(err?.response.data.message || "Signup failed");
+    }
+  };
+
+  return (
+    // Added pt-16 and pb-12 to justify-start to push the content down from the very top
+    <div className="min-h-screen flex flex-col items-center justify-start bg-[#050508] relative overflow-hidden px-4 font-sans pt-16 pb-12">
+      
+      {/* Dynamic Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-teal-500/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px]" />
+
+      {/* Brand Identity - Increased mb-12 to create a gap before the card */}
+      <div className="relative z-10 flex flex-col items-center mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <div className="p-4 bg-white/5 border border-white/10 rounded-2xl mb-4 shadow-2xl backdrop-blur-md">
+              <FiActivity className="text-teal-500 text-3xl" />
+          </div>
+          <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">
+              Dev<span className="text-teal-500">Dash</span>
+          </h1>
+          <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.4em] mt-3">
+              Deployment Phase: Registration
+          </p>
+      </div>
+
+      {/* Main Card - Max width adjusted for better proportions */}
+      <div className="relative z-10 w-full max-w-[460px] bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-10 md:p-12 shadow-2xl shadow-black/50">
+        <div className="mb-10 text-center">
+          <h2 className="text-2xl font-bold text-white tracking-tight">Create Identity</h2>
+          <p className="text-gray-500 text-sm mt-2 italic opacity-80">Join the network and showcase your projects</p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Username Input */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Unique Username</label>
+            <div className="relative group">
+              <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-teal-500 transition-colors" />
+              <input
+                placeholder="johndoe_dev"
+                {...register("username")}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all"
+              />
+            </div>
+            {errors.username && <p className="text-[10px] font-bold text-red-400 mt-1 ml-1 uppercase">{errors.username.message}</p>}
+          </div>
+
+          {/* Email Input */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Email Address</label>
+            <div className="relative group">
+              <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-teal-500 transition-colors" />
+              <input
+                type="email"
+                placeholder="contact@domain.com"
+                {...register("email")}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all"
+              />
+            </div>
+            {errors.email && <p className="text-[10px] font-bold text-red-400 mt-1 ml-1 uppercase">{errors.email.message}</p>}
+          </div>
+
+          {/* Password Input */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Secure Password</label>
+            <div className="relative group">
+              <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-teal-500 transition-colors" />
+              <input
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all"
+              />
+            </div>
+            {errors.password && <p className="text-[10px] font-bold text-red-400 mt-1 ml-1 uppercase">{errors.password.message}</p>}
+          </div>
+
+          {/* Submit Button - mt-4 added for a gap before button */}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="group relative w-full py-4 mt-4 rounded-2xl bg-teal-500 hover:bg-teal-400 text-black font-black uppercase tracking-widest transition-all shadow-lg shadow-teal-500/20 disabled:opacity-50 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              {isSubmitting ? "Initializing Account..." : "Confirm & Register"}
+              {!isSubmitting && <FiArrowRight className="group-hover:translate-x-1 transition-transform" />}
+            </span>
+          </button>
+        </form>
+
+        {/* Footer Link - Increased mt-10 and pt-8 for better visual separation */}
+        <div className="mt-10 text-center pt-8 border-t border-white/5">
+          <p className="text-gray-500 text-xs font-medium">
+            Already have an active session?{" "}
+            <Link to="/login" className="text-white hover:text-teal-400 font-bold ml-1 transition-colors">
+              Sign In
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
